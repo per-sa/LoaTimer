@@ -17,7 +17,7 @@ class Window(QMainWindow):
         )
 
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        self.setGeometry(100, 100, 400, 500)
+        self.setGeometry(0, 0, 250, 200)
         self.UiComponents()
         self.show()
 
@@ -27,33 +27,36 @@ class Window(QMainWindow):
         self.count = 0
 
         self.flag = False
+        self.allow_screenshot = False
+
 
         self.label = QLabel(self)
-        self.label.setGeometry(75, 100, 250, 70)
-        self.label.setStyleSheet("color: #ccff33;")
+        self.label.setGeometry(60, 100, 250, 100)
+        self.label.setStyleSheet("color: #ccff33; background-color: #212529;")
         self.label.setText(str(self.count))
-        self.label.setFont(QFont("Arial", 25))
-        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setFont(QFont("Arial", 60))
 
-        start = QPushButton("Start", self)
-        start.setGeometry(125, 250, 150, 40)
+        start = QPushButton("▶️", self)
+        start.setGeometry(50, 0, 50, 40)
         start.setStyleSheet("color: #ccff33;")
         start.pressed.connect(self.Start)
 
-        pause = QPushButton("Pause", self)
-        pause.setGeometry(125, 300, 150, 40)
+        pause = QPushButton("⏸", self)
+        pause.setGeometry(100, 0, 50, 40)
         pause.setStyleSheet("color: yellow;")
         pause.pressed.connect(self.Pause)
 
-        reset = QPushButton("Reset", self)
-        reset.setGeometry(125, 350, 150, 40)
+        reset = QPushButton("❌", self)
+        reset.setGeometry(150, 0, 50, 40)
         reset.setStyleSheet("color: red;")
         reset.pressed.connect(self.Reset)
 
-        screenshot = QPushButton("Screenshot", self)
-        screenshot.setGeometry(125, 400, 150, 40)
-        screenshot.setStyleSheet("color: white; background-color: green;")
-        screenshot.pressed.connect(self.ScreenGrab)
+        self.screenshot_btn = QPushButton("Screenshot", self)
+        self.screenshot_btn.setGeometry(50, 50, 150, 40)
+        
+        self.screenshot_btn.setStyleSheet("color: white")
+
+        self.screenshot_btn.pressed.connect(self.ScreenGrab)
 
         timer = QTimer(self)
 
@@ -75,11 +78,16 @@ class Window(QMainWindow):
     def Start(self):
 
         self.flag = True
+        self.allow_screenshot = False
+        self.screenshot_btn.setStyleSheet("color: white")
+
 
 
     def Pause(self):
 
         self.flag = False
+        self.allow_screenshot = True
+        self.screenshot_btn.setStyleSheet("color: white; background-color: green;")
 
 
     def Reset(self):
@@ -89,19 +97,25 @@ class Window(QMainWindow):
         self.count = 0
 
         self.label.setText(str(self.count))
-
+        self.allow_screenshot = False
+        self.screenshot_btn.setStyleSheet("color: white")
+        
 
     def ScreenGrab(self):
-        chars = string.ascii_uppercase + string.digits + string.ascii_uppercase
-        name = ''.join(random.choice(chars) for i in range(12))
-        screen = QApplication.primaryScreen()
-        screenshot = screen.grabWindow(self.winId())
-        screenshot.save(f"{name}.png", "png")
+        if self.flag == False and self.allow_screenshot == True:
+            chars = string.ascii_uppercase + string.digits + string.ascii_uppercase
+            name = ''.join(random.choice(chars) for i in range(12))
+            screen = QApplication.primaryScreen()
+            screenshot = screen.grabWindow(self.winId())
+            screenshot.save(f"{name}.png", "png")
+        else:
+            pass
 
 
 App = QApplication(sys.argv)
 App.setApplicationName("LoA Timer v1.0")
 App.setApplicationDisplayName("LoA Timer v1.0")
+App.setWindowIcon(QIcon("icon.png"))
 
 window = Window()
 
